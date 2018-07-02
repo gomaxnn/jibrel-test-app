@@ -6,7 +6,7 @@
   "scripts": {
     "server:dev": "NODE_DEBUG=bull nodemon --watch server -- -r dotenv/config",
     "server": "node -r dotenv/config server",
-    "front:build": "webpack",
+    "front:build": "webpack-cli",
     "front:dev": "webpack-dev-server --hot",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
