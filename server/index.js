@@ -9,6 +9,14 @@ const bodyParser = require('body-parser'),
     cors = require('cors'),
     app = express()
 
+function getMessageId (jobId, prefix = 'http') {
+    return `${prefix}-${jobId}`
+}
+
+function getJobId (messageId) {
+    return messageId.split('-')[1]
+}
+
 /**
  * WEBSOCKET SERVER
  */
@@ -61,8 +69,9 @@ wss.on('connection', (socket) => {
         
         if (msg.type === wsEvents.MESSAGE_CREATE) {
             const data = await createJob(socketQueue, msg.data)
-            const result = JSON.stringify({ type: wsEvents.MESSAGE_CREATE, data })
+            data.id = getMessageId(data.id, 'socket')
             addToStack('created', data)
+            const result = JSON.stringify({ type: wsEvents.MESSAGE_CREATE, data })
             return socket.send(result, ack)
         }
         else if (msg.type === wsEvents.MESSAGE_CREATE_CONFIRM) {
@@ -120,7 +129,7 @@ function createQueue (queueName) {
             
             if (job.queue.name === socketQueueName) {
                 const data = Object.assign({
-                    id: job.id,
+                    id: getMessageId(job.id, 'socket'),
                     state: 'completed'
                 }, result)
                 
@@ -140,7 +149,10 @@ function createQueue (queueName) {
             console.info(`Job ${job.id} failed`)
             
             if (job.queue.name === socketQueueName) {
-                const data = { id: job.id, state: 'lost' }
+                const data = {
+                    id: getMessageId(job.id, 'socket'),
+                    state: 'lost'
+                }
                 addToStack('updated', data)
                 pushMessage(wsEvents.MESSAGE_UPDATE, data)
             }
@@ -209,6 +221,7 @@ app.use(
 app.post('/messages', async (req, res, next) => {
     try {
         const message = await createJob(httpQueue, req.body)
+        message.id = getMessageId(message.id, 'http')
         res.json(message)
     }
     catch (err) {
@@ -219,7 +232,8 @@ app.post('/messages', async (req, res, next) => {
 app.get('/messages/:id', async (req, res, next) => {
     try {
         const { id } = req.params
-        const job = await httpQueue.getJob(id)
+        const jobId = getJobId(id)
+        const job = await httpQueue.getJob(jobId)
         const state = job ? await job.getState() : 'lost'
         
         const message = Object.assign(

@@ -24,12 +24,11 @@ const DatagridRows = ({ virtual, itemHeight }) => (
     <div style={virtual.style}>
         {virtual.items.map(m => (
             <div key={m.id} id={m.id} className="row" style={{ height: itemHeight }}>
-                <div className="col-1">{m.id}</div>
-                <div className="col-2">{m.transport}</div>
+                <div className="col-2">{m.id}</div>
                 <div className="col-3">{formatCreated(m.created)}</div>
                 <div className="col-3">{m.data}</div>
                 <div className="col-2">{m.state}</div>
-                <div className="col-1">{formatResult(m.result, m.state, m.refId)}</div>
+                <div className="col-2">{formatResult(m.result, m.state, m.refId)}</div>
             </div>
         ))}
     </div>

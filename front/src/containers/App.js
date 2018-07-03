@@ -43,7 +43,6 @@ class App extends Component {
     renderDatagrid () {
         const headers = {
             id: 'ID',
-            transport: 'Transport',
             created: 'Created',
             data: 'Data',
             state: 'State',
@@ -58,7 +57,6 @@ class App extends Component {
             <div className="container">
                 <DatagridHead
                     id={headers.id}
-                    transport={headers.transport}
                     created={headers.created}
                     data={headers.data}
                     state={headers.state}
